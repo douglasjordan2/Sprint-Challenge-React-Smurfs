@@ -1,57 +1,38 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
-import axios from 'axios';
 
 import './App.css';
-import SmurfForm from './components/SmurfForm';
+import SmurfForm from './components/Form/SmurfForm';
 import Smurfs from './components/Smurfs';
-import Smurf from './components/Smurf';
+import Smurf from './components/Smurf/Smurf';
 import Nav from './components/Nav';
+import smurfFound from './components/getSmurfs';
+import NoSmurfs from './components/Smurf/NoSmurfs';
+import checkSmurf from './components/checkSmurf';
+
+const CheckSmurfs = smurfFound(NoSmurfs)
+const RenderSmurfs = CheckSmurfs(Smurfs)
+
+const CheckSmurf = checkSmurf(NoSmurfs)
+const RenderSmurf = CheckSmurf(Smurf)
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      smurfs: [],
-    };
-  }
-  // add any needed code to ensure that the smurfs collection exists on state and it has data coming from the server
-  // Notice what your map function is looping over and returning inside of Smurfs.
-  // You'll need to make sure you have the right properties on state and pass them down to props.
+  state = {
+    smurfs: []
+  };
 
-  componentDidMount() {
-    this.getSmurfs()
-  }
-
-  getSmurfs = () => {
-    axios
-      .get('http://localhost:3333/smurfs')
-      .then(response => {
-        this.setState({ smurfs: response.data })
-      })
-      .catch(err => console.log(err))
+  getSmurfs = (smurfs) => {
+    this.setState({ smurfs: smurfs })
   }
 
   handleSubmit = arr => {
     this.setState({ smurfs: arr })
   }
 
-  handleDelete = smurf => {
-    axios
-      .delete(`http://localhost:3333/smurfs/${smurf}`)
-      .then(response => {
-        this.setState({ smurfs: response.data })
-      })
-      .catch(err => console.log(err))
-  }
-
-  render() { console.log(this.state.smurfs)
+  render() {
     return (
       <div className="App">
-        <Route path = "/" render = { props => 
-          <Nav 
-            goBack = { this.getSmurfs }
-          /> } 
+        <Route path = "/" component = { Nav } 
         />
         <Route exact path = "/smurf-form" exact render = { props => 
           <SmurfForm 
@@ -62,16 +43,15 @@ class App extends Component {
           /> } 
         />
         <Route exact path="/smurfs/"  exact render = { props => 
-          <Smurfs 
+          <RenderSmurfs 
             {...props}
-            smurfs={this.state.smurfs}
+            getSmurfs = { this.getSmurfs }
+            smurfs = { this.state.smurfs }
           /> } 
         />
         <Route path="/smurfs/:id" render = { props => 
-          <Smurf 
+          <RenderSmurf 
             {...props}
-            smurfs = { this.state.smurfs }
-            delete = { this.handleDelete }
             submit = { this.handleSubmit }
           /> } 
         />
