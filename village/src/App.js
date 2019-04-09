@@ -1,24 +1,60 @@
 import React, { Component } from 'react';
+import { Route } from 'react-router-dom';
 
 import './App.css';
-import SmurfForm from './components/SmurfForm';
+import SmurfForm from './components/Form/SmurfForm';
 import Smurfs from './components/Smurfs';
+import Smurf from './components/Smurf/Smurf';
+import Nav from './components/Nav';
+import smurfFound from './components/getSmurfs';
+import NoSmurfs from './components/Smurf/NoSmurfs';
+import checkSmurf from './components/checkSmurf';
+
+const CheckSmurfs = smurfFound(NoSmurfs)
+const RenderSmurfs = CheckSmurfs(Smurfs)
+
+const CheckSmurf = checkSmurf(NoSmurfs)
+const RenderSmurf = CheckSmurf(Smurf)
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      smurfs: [],
-    };
+  state = {
+    smurfs: []
+  };
+
+  getSmurfs = (smurfs) => {
+    this.setState({ smurfs: smurfs })
   }
-  // add any needed code to ensure that the smurfs collection exists on state and it has data coming from the server
-  // Notice what your map function is looping over and returning inside of Smurfs.
-  // You'll need to make sure you have the right properties on state and pass them down to props.
+
+  handleSubmit = arr => {
+    this.setState({ smurfs: arr })
+  }
+
   render() {
     return (
       <div className="App">
-        <SmurfForm />
-        <Smurfs smurfs={this.state.smurfs} />
+        <Route path = "/" component = { Nav } 
+        />
+        <Route exact path = "/smurf-form" exact render = { props => 
+          <SmurfForm 
+            {...props}
+            btn = { 'Add to the village' }
+            submit = { this.handleSubmit }
+            update = { false }
+          /> } 
+        />
+        <Route exact path="/smurfs/"  exact render = { props => 
+          <RenderSmurfs 
+            {...props}
+            getSmurfs = { this.getSmurfs }
+            smurfs = { this.state.smurfs }
+          /> } 
+        />
+        <Route path="/smurfs/:id" render = { props => 
+          <RenderSmurf 
+            {...props}
+            submit = { this.handleSubmit }
+          /> } 
+        />
       </div>
     );
   }
